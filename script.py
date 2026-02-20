@@ -10,6 +10,7 @@ EMAIL = "your-email@example.com"  # PubMed requires an email for API access
 SEARCH_QUERY_PUBMED = '("new species"[Title/Abstract] OR "new genus"[Title/Abstract] OR "new taxon"[Title/Abstract]) AND (fossil OR paleontology)'
 SEARCH_QUERY_BIORXIV = 'fossil OR paleontology OR "new species"' # bioRxiv search is simpler
 CSV_PATH = "data/fossils.csv"
+LOG_PATH = "data/run_log.csv"
 
 def search_pubmed():
     Entrez.email = EMAIL
@@ -23,6 +24,7 @@ def search_pubmed():
     return record["IdList"]
 
 def fetch_pubmed_details(id_list):
+    # ... existing implementation ...
     if not id_list:
         return []
     
@@ -70,7 +72,7 @@ def fetch_pubmed_details(id_list):
     return results
 
 def search_biorxiv():
-    # bioRxiv API: https://api.biorxiv.org/details/publisher/interval/yyyy-mm-dd/yyyy-mm-dd/cursor
+    # ... existing implementation ...
     today = datetime.now().strftime("%Y-%m-%d")
     last_week = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
     
@@ -104,7 +106,7 @@ def search_biorxiv():
         return []
 
 def extract_species(title, abstract):
-    # Look for patterns like "Name gen. et sp. nov." or "Name sp. nov."
+    # ... existing implementation ...
     pattern = r"([A-Z][a-z]+ [a-z]+) (?:gen\. et |sp\. )?nov\."
     match = re.search(pattern, title + " " + abstract)
     return match.group(1) if match else "Unknown"
@@ -117,7 +119,7 @@ def extract_group(abstract):
     return "Unknown"
 
 def extract_fossil_date(abstract):
-    # Look for "Ma" (Million years ago) or Epoch names
+    # ... existing implementation ...
     ma_pattern = r"(\d+(?:\.\d+)?\s?Ma)"
     epochs = ["Cretaceous", "Jurassic", "Triassic", "Permian", "Carboniferous", "Devonian", "Silurian", "Ordovician", "Cambrian", "Pleistocene", "Pliocene", "Miocene", "Oligocene", "Eocene", "Paleocene"]
     
@@ -133,7 +135,7 @@ def extract_fossil_date(abstract):
 def update_csv(new_data):
     if not new_data:
         print("No new data found.")
-        return False
+        return 0
     
     os.makedirs(os.path.dirname(CSV_PATH), exist_ok=True)
     
@@ -141,34 +143,56 @@ def update_csv(new_data):
     
     if os.path.exists(CSV_PATH):
         df = pd.read_csv(CSV_PATH)
-        # Ensure 'Source' column exists for older files
         if "Source" not in df.columns:
             df.insert(0, "Source", "PubMed")
     else:
         df = pd.DataFrame(columns=cols)
     
     new_df = pd.DataFrame(new_data)
-    
-    # Merge and deduplicate by DOI
     combined_df = pd.concat([df, new_df]).drop_duplicates(subset=["DOI"], keep="first")
     
-    if len(combined_df) > len(df):
+    added_count = len(combined_df) - len(df)
+    if added_count > 0:
         combined_df.to_csv(CSV_PATH, index=False)
-        print(f"Added {len(combined_df) - len(df)} new entries.")
-        return True
+        print(f"Added {added_count} new entries.")
     else:
         print("No new unique entries to add.")
-        return False
+    return added_count
+
+def log_run(pubmed_count, biorxiv_count, added_count):
+    os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
+    
+    log_entry = {
+        "Run Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "PubMed Found": pubmed_count,
+        "bioRxiv Found": biorxiv_count,
+        "New Entries Added": added_count
+    }
+    
+    df_new = pd.DataFrame([log_entry])
+    
+    if os.path.exists(LOG_PATH):
+        df_log = pd.read_csv(LOG_PATH)
+        df_log = pd.concat([df_log, df_new], ignore_index=True)
+    else:
+        df_log = df_new
+    
+    df_log.to_csv(LOG_PATH, index=False)
+    print(f"Log updated at {LOG_PATH}")
 
 if __name__ == "__main__":
     print("Searching PubMed for new fossils...")
     pubmed_ids = search_pubmed()
-    print(f"Found {len(pubmed_ids)} PubMed candidates.")
+    pubmed_count = len(pubmed_ids)
+    print(f"Found {pubmed_count} PubMed candidates.")
     pubmed_details = fetch_pubmed_details(pubmed_ids)
     
     print("Searching bioRxiv for new preprints...")
     biorxiv_details = search_biorxiv()
-    print(f"Found {len(biorxiv_details)} bioRxiv candidates.")
+    biorxiv_count = len(biorxiv_details)
+    print(f"Found {biorxiv_count} bioRxiv candidates.")
     
     all_details = pubmed_details + biorxiv_details
-    update_csv(all_details)
+    added_count = update_csv(all_details)
+    
+    log_run(pubmed_count, biorxiv_count, added_count)
