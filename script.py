@@ -133,12 +133,7 @@ def extract_fossil_date(abstract):
     return "Unknown"
 
 def update_csv(new_data):
-    if not new_data:
-        print("No new data found.")
-        return 0
-    
     os.makedirs(os.path.dirname(CSV_PATH), exist_ok=True)
-    
     cols = ["Source", "DOI", "Title", "Authors", "Publication Date", "Species", "Group", "Fossil Date", "Fetched At"]
     
     if os.path.exists(CSV_PATH):
@@ -147,6 +142,11 @@ def update_csv(new_data):
             df.insert(0, "Source", "PubMed")
     else:
         df = pd.DataFrame(columns=cols)
+        df.to_csv(CSV_PATH, index=False) # Ensure file exists even if empty
+
+    if not new_data:
+        print("No new data found.")
+        return 0
     
     new_df = pd.DataFrame(new_data)
     combined_df = pd.concat([df, new_df]).drop_duplicates(subset=["DOI"], keep="first")
