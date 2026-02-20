@@ -2,25 +2,27 @@ import os
 import pandas as pd
 from Bio import Entrez
 import re
+import requests
 from datetime import datetime, timedelta
 
 # Configuration
 EMAIL = "your-email@example.com"  # PubMed requires an email for API access
-SEARCH_QUERY = '("new species"[Title/Abstract] OR "new genus"[Title/Abstract] OR "new taxon"[Title/Abstract]) AND (fossil OR paleontology)'
+SEARCH_QUERY_PUBMED = '("new species"[Title/Abstract] OR "new genus"[Title/Abstract] OR "new taxon"[Title/Abstract]) AND (fossil OR paleontology)'
+SEARCH_QUERY_BIORXIV = 'fossil OR paleontology OR "new species"' # bioRxiv search is simpler
 CSV_PATH = "data/fossils.csv"
 
 def search_pubmed():
     Entrez.email = EMAIL
-    # Search for articles from the last 2 days
-    date_threshold = (datetime.now() - timedelta(days=2)).strftime("%Y/%m/%d")
-    query = f"({SEARCH_QUERY}) AND ({date_threshold}[Publication Date] : 3000[Publication Date])"
+    # Search for articles from the last 7 days (to be more inclusive)
+    date_threshold = (datetime.now() - timedelta(days=7)).strftime("%Y/%m/%d")
+    query = f"({SEARCH_QUERY_PUBMED}) AND ({date_threshold}[Publication Date] : 3000[Publication Date])"
     
     handle = Entrez.esearch(db="pubmed", term=query, retmax=50)
     record = Entrez.read(handle)
     handle.close()
     return record["IdList"]
 
-def fetch_details(id_list):
+def fetch_pubmed_details(id_list):
     if not id_list:
         return []
     
@@ -54,6 +56,7 @@ def fetch_details(id_list):
         fossil_date = extract_fossil_date(abstract)
         
         results.append({
+            "Source": "PubMed",
             "DOI": doi,
             "Title": title,
             "Authors": authors,
@@ -65,6 +68,40 @@ def fetch_details(id_list):
         })
     
     return results
+
+def search_biorxiv():
+    # bioRxiv API: https://api.biorxiv.org/details/publisher/interval/yyyy-mm-dd/yyyy-mm-dd/cursor
+    today = datetime.now().strftime("%Y-%m-%d")
+    last_week = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
+    
+    url = f"https://api.biorxiv.org/details/biorxiv/{last_week}/{today}/0"
+    try:
+        response = requests.get(url)
+        data = response.json()
+        preprints = data.get("collection", [])
+        
+        results = []
+        for p in preprints:
+            title = p.get("title", "")
+            abstract = p.get("abstract", "")
+            
+            # Filter by keywords since the API interval returns everything
+            if any(kw in (title + abstract).lower() for kw in ["fossil", "paleontology", "new species", "sp. nov."]):
+                results.append({
+                    "Source": "bioRxiv",
+                    "DOI": p.get("doi", "N/A"),
+                    "Title": title,
+                    "Authors": p.get("authors", "N/A"),
+                    "Publication Date": p.get("date", "N/A"),
+                    "Species": extract_species(title, abstract),
+                    "Group": extract_group(abstract),
+                    "Fossil Date": extract_fossil_date(abstract),
+                    "Fetched At": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                })
+        return results
+    except Exception as e:
+        print(f"Error searching bioRxiv: {e}")
+        return []
 
 def extract_species(title, abstract):
     # Look for patterns like "Name gen. et sp. nov." or "Name sp. nov."
@@ -100,10 +137,15 @@ def update_csv(new_data):
     
     os.makedirs(os.path.dirname(CSV_PATH), exist_ok=True)
     
+    cols = ["Source", "DOI", "Title", "Authors", "Publication Date", "Species", "Group", "Fossil Date", "Fetched At"]
+    
     if os.path.exists(CSV_PATH):
         df = pd.read_csv(CSV_PATH)
+        # Ensure 'Source' column exists for older files
+        if "Source" not in df.columns:
+            df.insert(0, "Source", "PubMed")
     else:
-        df = pd.DataFrame(columns=["DOI", "Title", "Authors", "Publication Date", "Species", "Group", "Fossil Date", "Fetched At"])
+        df = pd.DataFrame(columns=cols)
     
     new_df = pd.DataFrame(new_data)
     
@@ -120,7 +162,13 @@ def update_csv(new_data):
 
 if __name__ == "__main__":
     print("Searching PubMed for new fossils...")
-    ids = search_pubmed()
-    print(f"Found {len(ids)} candidates.")
-    details = fetch_details(ids)
-    update_csv(details)
+    pubmed_ids = search_pubmed()
+    print(f"Found {len(pubmed_ids)} PubMed candidates.")
+    pubmed_details = fetch_pubmed_details(pubmed_ids)
+    
+    print("Searching bioRxiv for new preprints...")
+    biorxiv_details = search_biorxiv()
+    print(f"Found {len(biorxiv_details)} bioRxiv candidates.")
+    
+    all_details = pubmed_details + biorxiv_details
+    update_csv(all_details)
