@@ -146,10 +146,20 @@ def update_csv(new_data):
 
     if not new_data:
         print("No new data found.")
-        return 0
+        return set()
     
     new_df = pd.DataFrame(new_data)
-    combined_df = pd.concat([df, new_df]).drop_duplicates(subset=["DOI"], keep="first")
+    
+    if not df.empty and "DOI" in df.columns:
+        existing_dois = set(df["DOI"].dropna())
+    else:
+        existing_dois = set()
+        
+    unique_new_df = new_df.drop_duplicates(subset=["DOI"], keep="first")
+    added_df = unique_new_df[~unique_new_df["DOI"].isin(existing_dois)]
+    added_dois = set(added_df["DOI"].dropna().tolist())
+    
+    combined_df = pd.concat([df, unique_new_df]).drop_duplicates(subset=["DOI"], keep="first")
     
     added_count = len(combined_df) - len(df)
     if added_count > 0:
@@ -157,19 +167,40 @@ def update_csv(new_data):
         print(f"Added {added_count} new entries.")
     else:
         print("No new unique entries to add.")
-    return added_count
+        
+    return added_dois
 
-def log_run(pubmed_count, biorxiv_count, added_count):
+def log_run(run_date, all_details, added_dois):
     os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
     
-    log_entry = {
-        "Run Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "PubMed Found": pubmed_count,
-        "bioRxiv Found": biorxiv_count,
-        "New Entries Added": added_count
-    }
+    log_entries = []
     
-    df_new = pd.DataFrame([log_entry])
+    if not all_details:
+        log_entries.append({
+            "Run Date": run_date,
+            "Source": "N/A",
+            "DOI": "N/A",
+            "Title": "N/A",
+            "New entries added": 0
+        })
+    else:
+        added_dois_tracker = added_dois.copy()
+        for detail in all_details:
+            doi = detail.get("DOI", "N/A")
+            is_added = 0
+            if doi in added_dois_tracker:
+                is_added = 1
+                added_dois_tracker.remove(doi) # Only count as added once
+                
+            log_entries.append({
+                "Run Date": run_date,
+                "Source": detail.get("Source", "N/A"),
+                "DOI": doi,
+                "Title": detail.get("Title", "N/A"),
+                "New entries added": is_added
+            })
+            
+    df_new = pd.DataFrame(log_entries)
     
     if os.path.exists(LOG_PATH):
         df_log = pd.read_csv(LOG_PATH)
@@ -181,6 +212,8 @@ def log_run(pubmed_count, biorxiv_count, added_count):
     print(f"Log updated at {LOG_PATH}")
 
 if __name__ == "__main__":
+    run_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
     print("Searching PubMed for new fossils...")
     pubmed_ids = search_pubmed()
     pubmed_count = len(pubmed_ids)
@@ -193,6 +226,6 @@ if __name__ == "__main__":
     print(f"Found {biorxiv_count} bioRxiv candidates.")
     
     all_details = pubmed_details + biorxiv_details
-    added_count = update_csv(all_details)
+    added_dois = update_csv(all_details)
     
-    log_run(pubmed_count, biorxiv_count, added_count)
+    log_run(run_date, all_details, added_dois)
