@@ -245,4 +245,3 @@ if __name__ == "__main__":
     article_status_map = update_csv(all_details)
     
     log_run(run_date, all_details, article_status_map)
-```
