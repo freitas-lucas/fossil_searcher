@@ -144,22 +144,37 @@ def update_csv(new_data):
         df = pd.DataFrame(columns=cols)
         df.to_csv(CSV_PATH, index=False) # Ensure file exists even if empty
 
+    article_status_map = {} # DOI -> {"status": ..., "first_found": ...}
+
     if not new_data:
         print("No new data found.")
-        return set()
+        return article_status_map
     
     new_df = pd.DataFrame(new_data)
     
     if not df.empty and "DOI" in df.columns:
-        existing_dois = set(df["DOI"].dropna())
+        existing_dois_map = df.dropna(subset=["DOI"]).set_index("DOI")["Fetched At"].to_dict()
     else:
-        existing_dois = set()
+        existing_dois_map = {}
         
     unique_new_df = new_df.drop_duplicates(subset=["DOI"], keep="first")
-    added_df = unique_new_df[~unique_new_df["DOI"].isin(existing_dois)]
-    added_dois = set(added_df["DOI"].dropna().tolist())
     
-    combined_df = pd.concat([df, unique_new_df]).drop_duplicates(subset=["DOI"], keep="first")
+    for _, row in unique_new_df.iterrows():
+        doi = row["DOI"]
+        if doi in existing_dois_map:
+            article_status_map[doi] = {
+                "status": f"Duplicate (First found: {existing_dois_map[doi]})",
+                "first_found": existing_dois_map[doi]
+            }
+        else:
+            article_status_map[doi] = {
+                "status": "New entry",
+                "first_found": row["Fetched At"]
+            }
+            
+    added_df = unique_new_df[~unique_new_df["DOI"].isin(existing_dois_map.keys())]
+    
+    combined_df = pd.concat([df, added_df]).drop_duplicates(subset=["DOI"], keep="first")
     
     added_count = len(combined_df) - len(df)
     if added_count > 0:
@@ -168,9 +183,9 @@ def update_csv(new_data):
     else:
         print("No new unique entries to add.")
         
-    return added_dois
+    return article_status_map
 
-def log_run(run_date, all_details, added_dois):
+def log_run(run_date, all_details, article_status_map):
     os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
     
     log_entries = []
@@ -181,29 +196,30 @@ def log_run(run_date, all_details, added_dois):
             "Source": "N/A",
             "DOI": "N/A",
             "Title": "N/A",
-            "New entries added": 0
+            "Status": "N/A"
         })
     else:
-        added_dois_tracker = added_dois.copy()
         for detail in all_details:
             doi = detail.get("DOI", "N/A")
-            is_added = 0
-            if doi in added_dois_tracker:
-                is_added = 1
-                added_dois_tracker.remove(doi) # Only count as added once
+            status_info = article_status_map.get(doi, {"status": "Unknown"})
                 
             log_entries.append({
                 "Run Date": run_date,
                 "Source": detail.get("Source", "N/A"),
                 "DOI": doi,
                 "Title": detail.get("Title", "N/A"),
-                "New entries added": is_added
+                "Status": status_info["status"]
             })
             
     df_new = pd.DataFrame(log_entries)
     
     if os.path.exists(LOG_PATH):
         df_log = pd.read_csv(LOG_PATH)
+        # Handle migration if column name changed
+        if "New entries added" in df_log.columns:
+            df_log = df_log.rename(columns={"New entries added": "Status"})
+        elif "New Entries Added" in df_log.columns:
+            df_log = df_log.rename(columns={"New Entries Added": "Status"})
         df_log = pd.concat([df_log, df_new], ignore_index=True)
     else:
         df_log = df_new
@@ -226,6 +242,7 @@ if __name__ == "__main__":
     print(f"Found {biorxiv_count} bioRxiv candidates.")
     
     all_details = pubmed_details + biorxiv_details
-    added_dois = update_csv(all_details)
+    article_status_map = update_csv(all_details)
     
-    log_run(run_date, all_details, added_dois)
+    log_run(run_date, all_details, article_status_map)
+```
