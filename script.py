@@ -245,3 +245,20 @@ if __name__ == "__main__":
     article_status_map = update_csv(all_details)
     
     log_run(run_date, all_details, article_status_map)
+
+    # Generate summary for email notifications if new articles found
+    new_articles = [
+        f"- {detail.get('Title')} (Source: {detail.get('Source')}, DOI: {detail.get('DOI')})"
+        for detail in all_details
+        if article_status_map.get(detail.get("DOI"), {}).get("status") == "New entry"
+    ]
+    
+    summary_path = "data/new_articles_summary.txt"
+    if new_articles:
+        with open(summary_path, "w") as f:
+            f.write("A new fossil publication was found!\n\n")
+            f.write("\n".join(new_articles))
+            f.write("\n\nCheck the full log in the repository.")
+        print(f"New articles summary created at {summary_path}")
+    elif os.path.exists(summary_path):
+        os.remove(summary_path) # Ensure old summaries aren't reused
