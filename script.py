@@ -247,11 +247,12 @@ if __name__ == "__main__":
     log_run(run_date, all_details, article_status_map)
 
     # Generate summary for email notifications if new articles found
-    new_articles = [
-        f"- {detail.get('Title')} (Source: {detail.get('Source')}, DOI: {detail.get('DOI')})"
-        for detail in all_details
-        if article_status_map.get(detail.get("DOI"), {}).get("status") == "New entry"
-    ]
+    new_articles = []
+    for detail in all_details:
+        doi = detail.get("DOI")
+        if article_status_map.get(doi, {}).get("status") == "New entry":
+            link = f"https://doi.org/{doi}" if doi and doi != "N/A" else "No DOI available"
+            new_articles.append(f"- {detail.get('Title')}\n  Source: {detail.get('Source')}\n  Link: {link}")
     
     summary_path = "data/new_articles_summary.txt"
     if new_articles:
