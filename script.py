@@ -11,6 +11,7 @@ SEARCH_QUERY_PUBMED = '("new species"[Title/Abstract] OR "new genus"[Title/Abstr
 SEARCH_QUERY_BIORXIV = 'fossil OR paleontology OR "new species"' # bioRxiv search is simpler
 CSV_PATH = "data/fossils.csv"
 LOG_PATH = "data/run_log.csv"
+SUMMARY_PATH = "data/new_articles_summary.txt"
 
 def search_pubmed():
     Entrez.email = EMAIL
@@ -24,7 +25,6 @@ def search_pubmed():
     return record["IdList"]
 
 def fetch_pubmed_details(id_list):
-    # ... existing implementation ...
     if not id_list:
         return []
     
@@ -72,7 +72,6 @@ def fetch_pubmed_details(id_list):
     return results
 
 def search_biorxiv():
-    # ... existing implementation ...
     today = datetime.now().strftime("%Y-%m-%d")
     last_week = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
     
@@ -106,7 +105,7 @@ def search_biorxiv():
         return []
 
 def extract_species(title, abstract):
-    # ... existing implementation ...
+    # Look for patterns like "Name gen. et sp. nov." or "Name sp. nov."
     pattern = r"([A-Z][a-z]+ [a-z]+) (?:gen\. et |sp\. )?nov\."
     match = re.search(pattern, title + " " + abstract)
     return match.group(1) if match else "Unknown"
@@ -119,7 +118,7 @@ def extract_group(abstract):
     return "Unknown"
 
 def extract_fossil_date(abstract):
-    # ... existing implementation ...
+    # Look for "Ma" (Million years ago) or Epoch names
     ma_pattern = r"(\d+(?:\.\d+)?\s?Ma)"
     epochs = ["Cretaceous", "Jurassic", "Triassic", "Permian", "Carboniferous", "Devonian", "Silurian", "Ordovician", "Cambrian", "Pleistocene", "Pliocene", "Miocene", "Oligocene", "Eocene", "Paleocene"]
     
@@ -144,83 +143,61 @@ def update_csv(new_data):
         df = pd.DataFrame(columns=cols)
         df.to_csv(CSV_PATH, index=False) # Ensure file exists even if empty
 
-    article_status_map = {} # DOI -> {"status": ..., "first_found": ...}
-
     if not new_data:
         print("No new data found.")
-        return article_status_map
+        return 0, pd.DataFrame()
     
     new_df = pd.DataFrame(new_data)
     
-    if not df.empty and "DOI" in df.columns:
-        existing_dois_map = df.dropna(subset=["DOI"]).set_index("DOI")["Fetched At"].to_dict()
-    else:
-        existing_dois_map = {}
-        
-    unique_new_df = new_df.drop_duplicates(subset=["DOI"], keep="first")
+    # Identify unique new entries based on DOI
+    new_unique = new_df[~new_df["DOI"].isin(df["DOI"])]
     
-    for _, row in unique_new_df.iterrows():
-        doi = row["DOI"]
-        if doi in existing_dois_map:
-            article_status_map[doi] = {
-                "status": f"Duplicate (First found: {existing_dois_map[doi]})",
-                "first_found": existing_dois_map[doi]
-            }
-        else:
-            article_status_map[doi] = {
-                "status": "New entry",
-                "first_found": row["Fetched At"]
-            }
-            
-    added_df = unique_new_df[~unique_new_df["DOI"].isin(existing_dois_map.keys())]
-    
-    combined_df = pd.concat([df, added_df]).drop_duplicates(subset=["DOI"], keep="first")
-    
-    added_count = len(combined_df) - len(df)
-    if added_count > 0:
+    if len(new_unique) > 0:
+        combined_df = pd.concat([df, new_unique]).drop_duplicates(subset=["DOI"], keep="first")
         combined_df.to_csv(CSV_PATH, index=False)
-        print(f"Added {added_count} new entries.")
+        print(f"Added {len(new_unique)} new entries.")
     else:
         print("No new unique entries to add.")
-        
-    return article_status_map
+    
+    return len(new_unique), new_unique
 
-def log_run(run_date, all_details, article_status_map):
+def generate_summary(new_entries):
+    os.makedirs(os.path.dirname(SUMMARY_PATH), exist_ok=True)
+    if new_entries.empty:
+        if os.path.exists(SUMMARY_PATH):
+            os.remove(SUMMARY_PATH)
+        return
+    
+    with open(SUMMARY_PATH, "w") as f:
+        f.write("New Fossil Articles Found!\n\n")
+        f.write("Total: " + str(len(new_entries)) + "\n\n")
+        for idx, row in new_entries.iterrows():
+            f.write(f"- {row['Title']}\n")
+            f.write(f"  Source: {row['Source']}\n")
+            f.write(f"  Authors: {row['Authors']}\n")
+            f.write(f"  DOI: {row['DOI']}\n")
+            f.write(f"  Species: {row['Species']}\n")
+            f.write("-" * 20 + "\n")
+    print(f"Summary generated at {SUMMARY_PATH}")
+
+def log_run(pubmed_count, biorxiv_count, added_count):
     os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
     
-    log_entries = []
+    log_entry = {
+        "Run Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "PubMed Found": pubmed_count,
+        "bioRxiv Found": biorxiv_count,
+        "New Entries Added": added_count
+    }
     
-    if not all_details:
-        log_entries.append({
-            "Run Date": run_date,
-            "Source": "N/A",
-            "DOI": "N/A",
-            "Title": "N/A",
-            "Status": "N/A"
-        })
-    else:
-        for detail in all_details:
-            doi = detail.get("DOI", "N/A")
-            status_info = article_status_map.get(doi, {"status": "Unknown"})
-                
-            log_entries.append({
-                "Run Date": run_date,
-                "Source": detail.get("Source", "N/A"),
-                "DOI": doi,
-                "Title": detail.get("Title", "N/A"),
-                "Status": status_info["status"]
-            })
-            
-    df_new = pd.DataFrame(log_entries)
+    df_new = pd.DataFrame([log_entry])
     
     if os.path.exists(LOG_PATH):
-        df_log = pd.read_csv(LOG_PATH)
-        # Handle migration if column name changed
-        if "New entries added" in df_log.columns:
-            df_log = df_log.rename(columns={"New entries added": "Status"})
-        elif "New Entries Added" in df_log.columns:
-            df_log = df_log.rename(columns={"New Entries Added": "Status"})
-        df_log = pd.concat([df_log, df_new], ignore_index=True)
+        try:
+            df_log = pd.read_csv(LOG_PATH)
+            df_log = pd.concat([df_log, df_new], ignore_index=True)
+        except Exception:
+            df_log = df_new
     else:
         df_log = df_new
     
@@ -228,8 +205,6 @@ def log_run(run_date, all_details, article_status_map):
     print(f"Log updated at {LOG_PATH}")
 
 if __name__ == "__main__":
-    run_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    
     print("Searching PubMed for new fossils...")
     pubmed_ids = search_pubmed()
     pubmed_count = len(pubmed_ids)
@@ -242,24 +217,7 @@ if __name__ == "__main__":
     print(f"Found {biorxiv_count} bioRxiv candidates.")
     
     all_details = pubmed_details + biorxiv_details
-    article_status_map = update_csv(all_details)
+    added_count, new_entries = update_csv(all_details)
     
-    log_run(run_date, all_details, article_status_map)
-
-    # Generate summary for email notifications if new articles found
-    new_articles = []
-    for detail in all_details:
-        doi = detail.get("DOI")
-        if article_status_map.get(doi, {}).get("status") == "New entry":
-            link = f"https://doi.org/{doi}" if doi and doi != "N/A" else "No DOI available"
-            new_articles.append(f"- {detail.get('Title')}\n  Source: {detail.get('Source')}\n  Link: {link}")
-    
-    summary_path = "data/new_articles_summary.txt"
-    if new_articles:
-        with open(summary_path, "w") as f:
-            f.write("A new fossil publication was found!\n\n")
-            f.write("\n".join(new_articles))
-            f.write("\n\nCheck the full log in the repository.")
-        print(f"New articles summary created at {summary_path}")
-    elif os.path.exists(summary_path):
-        os.remove(summary_path) # Ensure old summaries aren't reused
+    generate_summary(new_entries)
+    log_run(pubmed_count, biorxiv_count, added_count)
