@@ -1,0 +1,28 @@
+New Fossil Articles Found!
+
+Total: 4
+
+- An Early Miocene ape from the biogeographic crossroads of African and Eurasian Hominoidea.
+  Source: PubMed
+  Authors: Al-Ashqar SF, Seiffert ER, El-Sayed S, Salem BS, Gohar AS, El-Saka H, Amin M, Sallam HM
+  DOI: 10.1126/science.adz4102
+  Species: Unknown
+--------------------
+- From setae to scales: Burmese amber fossils reveal the Early Cretaceous innovation of body coverings in scaly crickets.
+  Source: PubMed
+  Authors: Yuan W, Ma LB, Wang N, Ren D, Yue Y, Gu JJ
+  DOI: 10.1098/rspb.2025.3077
+  Species: Protomogoplistes ciliatus
+--------------------
+- New Burmese amber fossils reveal ancient forms of scale and wing pattern of the family Mogoplistidae Costa, 1855 (Orthoptera, Grylloidea).
+  Source: PubMed
+  Authors: Hu TH, Chen L, Zhuo D, Li K, He ZQ
+  DOI: 10.1098/rspb.2025.3105
+  Species: Angustisquama wangruoxii
+--------------------
+- Persistent Low-Level Infections of Elephant Endotheliotropic Herpesvirus and Elephant Gammaherpesvus in Skin Nodules and Saliva from Wild and Zoo African Elephants
+  Source: bioRxiv
+  Authors: Pearson, V. R.; Hayward, G. S.
+  DOI: 10.1101/2024.11.17.624021
+  Species: Unknown
+--------------------
