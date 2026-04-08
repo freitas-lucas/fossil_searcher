@@ -1,0 +1,10 @@
+New Fossil Articles Found!
+
+Total: 1
+
+- Computational simulations of potential Pachycrocuta bite damage based on a ~1.2 Ma ravaged hippopotamus femur from Fuente Nueva 3 (Orce, Granada, Spain)
+  Source: bioRxiv
+  Authors: Courtenay, L. A.; Serrano-Ramos, A.; Saarinen, J.; Viranta, S.; Barsky, D.; Jimenez-Arenas, J.-M.; Yravedra, J.
+  DOI: 10.1101/2024.07.07.602373
+  Species: Unknown
+--------------------
