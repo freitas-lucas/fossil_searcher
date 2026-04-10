@@ -15,11 +15,16 @@ SUMMARY_PATH = "data/new_articles_summary.txt"
 
 def search_pubmed():
     Entrez.email = EMAIL
-    # Search for articles from the last 7 days (to be more inclusive)
-    date_threshold = (datetime.now() - timedelta(days=7)).strftime("%Y/%m/%d")
-    query = f"({SEARCH_QUERY_PUBMED}) AND ({date_threshold}[Publication Date] : 3000[Publication Date])"
     
-    handle = Entrez.esearch(db="pubmed", term=query, retmax=50)
+    # Check for START_DATE environment variable (format: YYYY/MM/DD)
+    # Default to 7 days lookback if not provided
+    start_date = os.environ.get("START_DATE")
+    if not start_date:
+        start_date = (datetime.now() - timedelta(days=7)).strftime("%Y/%m/%d")
+    
+    query = f"({SEARCH_QUERY_PUBMED}) AND ({start_date}[Publication Date] : 3000[Publication Date])"
+    
+    handle = Entrez.esearch(db="pubmed", term=query, retmax=100)
     record = Entrez.read(handle)
     handle.close()
     return record["IdList"]
@@ -209,10 +214,7 @@ def log_run(pubmed_count, biorxiv_count, added_count, all_processed):
             "Source": "-",
             "DOI": "-",
             "Title": "No articles found",
-            "Status": "-",
-            "PubMed Found": pubmed_count,
-            "bioRxiv Found": biorxiv_count,
-            "New Entries Added": 0
+            "Status": "-"
         })
     else:
         # Log each found article individually
@@ -222,10 +224,7 @@ def log_run(pubmed_count, biorxiv_count, added_count, all_processed):
                 "Source": row['Source'],
                 "DOI": row['DOI'],
                 "Title": row['Title'],
-                "Status": row['Status'],
-                "PubMed Found": 0,
-                "bioRxiv Found": 0,
-                "New Entries Added": 1 if row['Status'] == "New entry" else 0
+                "Status": row['Status']
             })
     
     df_new = pd.DataFrame(entries_to_log)
@@ -233,13 +232,17 @@ def log_run(pubmed_count, biorxiv_count, added_count, all_processed):
     if os.path.exists(LOG_PATH):
         try:
             df_log = pd.read_csv(LOG_PATH)
+            # Ensure we only have the columns we want
+            if not df_log.empty:
+                df_log = df_log[["Run Date", "Source", "DOI", "Title", "Status"]]
             df_log = pd.concat([df_log, df_new], ignore_index=True)
         except Exception:
             df_log = df_new
     else:
         df_log = df_new
     
-    cols = ["Run Date", "Source", "DOI", "Title", "Status", "PubMed Found", "bioRxiv Found", "New Entries Added"]
+    # Ensure a consistent column order (5 columns only)
+    cols = ["Run Date", "Source", "DOI", "Title", "Status"]
     df_log = df_log[cols]
     
     df_log.to_csv(LOG_PATH, index=False)

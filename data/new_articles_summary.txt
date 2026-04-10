@@ -1,0 +1,70 @@
+New Fossil Articles Found!
+
+Total: 11
+
+- A New Genus and Species of Syspastoxyelidae (Hymenoptera) from Mid-Cretaceous Burmese Amber.
+  Source: PubMed
+  Authors: Li X, Niu G, Wei M
+  DOI: 10.3390/insects17030289
+  Species: Unknown
+--------------------
+- A new teleosaurid (Crocodylomorpha, Thalattosuchia) from the Sibumasu Terrane of Southeast Asia and a taxonomic reassessment of <i>Indosinosuchus</i>.
+  Source: PubMed
+  Authors: Lauprasert K, Nilpanapan A, Martin JE, Claude J, Wongko K, Trakunweerayut K, Dobutr N, Manitkoon S, Bhuttarach S, Nonsrirach T
+  DOI: 10.7717/peerj.20944
+  Species: Unknown
+--------------------
+- 3D morphology of the Cambrian bivalved arthropod Sunella informs about head segmentation, arthrodization, and arthropodization.
+  Source: PubMed
+  Authors: Liu C, Pates S, Zhang M, Wu Y, Ma J, Fu D, Zhang X
+  DOI: 10.1038/s42003-026-09909-z
+  Species: Sunella dimorphismus
+--------------------
+- Crossing the Tethys on "biotic ferries": new mayfly genera of Gondwanan origin in Mesozoic and Cenozoic deposits of Myanmar and India (Insecta: Ephemeroptera: Teloganodidae).
+  Source: PubMed
+  Authors: Godunko RJ, Jouault C, Martynov AV, Lian Z, Staniczek AH
+  DOI: 10.1186/s12862-025-02488-3
+  Species: Unknown
+--------------------
+- Morphology and mitochondrial genome-based analysis of the systematics and evolution of <i>Acanthochitona</i> species (Polyplacophora: Acanthochitonidae).
+  Source: PubMed
+  Authors: Kim IH, Hwang UW
+  DOI: 10.1007/s42995-026-00362-9
+  Species: Unknown
+--------------------
+- New Insights into Diversity of Myanmarinidae (Hyenoptera: Apocrita), with Description of Two New Species from Mid-Cretaceous Myanmar Amber.
+  Source: PubMed
+  Authors: Wang Z, Zheng Y, Rasnitsyn AP, Jia N, Wang W, Wang L, Zhang Y, Zhao F
+  DOI: 10.3390/insects17020147
+  Species: Unknown
+--------------------
+- The smallest tetrapod from the Middle Triassic of South America: a new procolophonoid parareptile from the Ladinian of Southern Brazil.
+  Source: PubMed
+  Authors: Müller RT, Roberto-da-Silva L, Aurélio PLP, Kerber L
+  DOI: 10.1038/s41598-026-35114-3
+  Species: Unknown
+--------------------
+- Insights on the enigmatic millipede order Siphoniulida (Myriapoda, Diplopoda): a new species bearing ozopores and its phylogenetic implications.
+  Source: PubMed
+  Authors: Recuero E, López-Estrada EK, Harden CW
+  DOI: 10.7717/peerj.20594
+  Species: Unknown
+--------------------
+- From the origin of life to a biosphere: Formation of artificial ecosystems where species shape and are shaped by each other.
+  Source: PubMed
+  Authors: Ivanko E, Belousov A
+  DOI: 10.1016/j.biosystems.2026.105711
+  Species: Unknown
+--------------------
+- ﻿Morphological and molecular studies of Mallomonas species from section Multisetigerae (Chrysophyceae, Synurales) with description of a new species.
+  Source: PubMed
+  Authors: Gusev ES, Safronova TV, Podunay YА, Tran H, Mohagan AB, Martynenko NA
+  DOI: 10.3897/phytokeys.269.179128
+  Species: Unknown
+--------------------
+- A new fossil fish sheds light on the rapid evolution of early lungfishes.
+  Source: PubMed
+  Authors: Qiao T, Cui X, Zhao W, Liu C, Li M, Lu J, Choo B, Zhu M
+  DOI: 10.1016/j.cub.2025.11.032
+  Species: Unknown
+--------------------
