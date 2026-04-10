@@ -180,26 +180,52 @@ def generate_summary(new_entries):
             f.write("-" * 20 + "\n")
     print(f"Summary generated at {SUMMARY_PATH}")
 
-def log_run(pubmed_count, biorxiv_count, added_count):
+def log_run(pubmed_count, biorxiv_count, added_count, new_entries):
     os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
     
-    log_entry = {
+    entries_to_log = []
+    
+    # 1. Log individual new entries
+    if not new_entries.empty:
+        for _, row in new_entries.iterrows():
+            entries_to_log.append({
+                "Run Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "Source": row['Source'],
+                "DOI": row['DOI'],
+                "Title": row['Title'],
+                "Status": "New entry",
+                "PubMed Found": 0,
+                "bioRxiv Found": 0,
+                "New Entries Added": 0
+            })
+    
+    # 2. Log summary row
+    entries_to_log.append({
         "Run Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "Source": "Summary",
+        "DOI": "-",
+        "Title": "Search completed" if added_count > 0 or pubmed_count + biorxiv_count > 0 else "No new articles found",
+        "Status": "Success",
         "PubMed Found": pubmed_count,
         "bioRxiv Found": biorxiv_count,
         "New Entries Added": added_count
-    }
+    })
     
-    df_new = pd.DataFrame([log_entry])
+    df_new = pd.DataFrame(entries_to_log)
     
     if os.path.exists(LOG_PATH):
         try:
             df_log = pd.read_csv(LOG_PATH)
+            # Ensure columns match even if header is missing or different
             df_log = pd.concat([df_log, df_new], ignore_index=True)
         except Exception:
             df_log = df_new
     else:
         df_log = df_new
+    
+    # Ensure a consistent column order
+    cols = ["Run Date", "Source", "DOI", "Title", "Status", "PubMed Found", "bioRxiv Found", "New Entries Added"]
+    df_log = df_log[cols]
     
     df_log.to_csv(LOG_PATH, index=False)
     print(f"Log updated at {LOG_PATH}")
@@ -220,4 +246,4 @@ if __name__ == "__main__":
     added_count, new_entries = update_csv(all_details)
     
     generate_summary(new_entries)
-    log_run(pubmed_count, biorxiv_count, added_count)
+    log_run(pubmed_count, biorxiv_count, added_count, new_entries)

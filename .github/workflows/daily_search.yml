@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write    # Required to push changes back to the repo
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
     - name: Checkout repository
@@ -32,8 +34,13 @@ jobs:
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git add data/*.csv data/*.txt || true
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Update PubMed fossil data [$(date +'%Y-%m-%d')]" && git push)
+        git add data/
+        if [ -n "$(git status --porcelain)" ]; then
+          git commit -m "Update PubMed fossil data [$(date +'%Y-%m-%d')]"
+          git push
+        else
+          echo "No changes to commit"
+        fi
 
     - name: Check if Summary File Exists
       id: check_file
