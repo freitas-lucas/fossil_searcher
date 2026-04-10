@@ -131,35 +131,52 @@ def extract_fossil_date(abstract):
             return epoch
     return "Unknown"
 
-def update_csv(new_data):
+def update_csv(all_details):
     os.makedirs(os.path.dirname(CSV_PATH), exist_ok=True)
     cols = ["Source", "DOI", "Title", "Authors", "Publication Date", "Species", "Group", "Fossil Date", "Fetched At"]
     
     if os.path.exists(CSV_PATH):
-        df = pd.read_csv(CSV_PATH)
-        if "Source" not in df.columns:
-            df.insert(0, "Source", "PubMed")
+        df_existing = pd.read_csv(CSV_PATH)
     else:
-        df = pd.DataFrame(columns=cols)
-        df.to_csv(CSV_PATH, index=False) # Ensure file exists even if empty
+        df_existing = pd.DataFrame(columns=cols)
+        df_existing.to_csv(CSV_PATH, index=False)
 
-    if not new_data:
+    if not all_details:
         print("No new data found.")
-        return 0, pd.DataFrame()
+        return 0, []
     
-    new_df = pd.DataFrame(new_data)
+    new_df = pd.DataFrame(all_details)
+    all_processed = []
     
-    # Identify unique new entries based on DOI
-    new_unique = new_df[~new_df["DOI"].isin(df["DOI"])]
+    for idx, row in new_df.iterrows():
+        # Check if already in the master database (fossils.csv)
+        if not df_existing.empty and row["DOI"] in df_existing["DOI"].values:
+            first_found = df_existing[df_existing["DOI"] == row["DOI"]]["Fetched At"].iloc[0]
+            # Extract just the date if it's a timestamp
+            date_str = first_found.split(" ")[0] if " " in first_found else first_found
+            status = f"Duplicate (First found: {date_str})"
+            processed_row = row.to_dict()
+            processed_row["Status"] = status
+            all_processed.append(processed_row)
+        else:
+            status = "New entry"
+            processed_row = row.to_dict()
+            processed_row["Status"] = status
+            all_processed.append(processed_row)
     
-    if len(new_unique) > 0:
-        combined_df = pd.concat([df, new_unique]).drop_duplicates(subset=["DOI"], keep="first")
+    # Identify unique new entries to append to fossils.csv
+    new_unique_df = pd.DataFrame([p for p in all_processed if p["Status"] == "New entry"])
+    
+    if not new_unique_df.empty:
+        # Drop Status before adding to fossils.csv
+        to_append = new_unique_df.drop(columns=["Status"])
+        combined_df = pd.concat([df_existing, to_append]).drop_duplicates(subset=["DOI"], keep="first")
         combined_df.to_csv(CSV_PATH, index=False)
-        print(f"Added {len(new_unique)} new entries.")
+        print(f"Added {len(new_unique_df)} new entries to {CSV_PATH}.")
     else:
-        print("No new unique entries to add.")
+        print("No new unique entries to add to fossils.csv.")
     
-    return len(new_unique), new_unique
+    return len(new_unique_df), all_processed
 
 def generate_summary(new_entries):
     os.makedirs(os.path.dirname(SUMMARY_PATH), exist_ok=True)
@@ -180,50 +197,48 @@ def generate_summary(new_entries):
             f.write("-" * 20 + "\n")
     print(f"Summary generated at {SUMMARY_PATH}")
 
-def log_run(pubmed_count, biorxiv_count, added_count, new_entries):
+def log_run(pubmed_count, biorxiv_count, added_count, all_processed):
     os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
     
     entries_to_log = []
     
-    # 1. Log individual new entries
-    if not new_entries.empty:
-        for _, row in new_entries.iterrows():
+    if not all_processed:
+        # Log a "No articles found" entry if the search yielded nothing
+        entries_to_log.append({
+            "Run Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "Source": "-",
+            "DOI": "-",
+            "Title": "No articles found",
+            "Status": "-",
+            "PubMed Found": pubmed_count,
+            "bioRxiv Found": biorxiv_count,
+            "New Entries Added": 0
+        })
+    else:
+        # Log each found article individually
+        for row in all_processed:
             entries_to_log.append({
                 "Run Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 "Source": row['Source'],
                 "DOI": row['DOI'],
                 "Title": row['Title'],
-                "Status": "New entry",
+                "Status": row['Status'],
                 "PubMed Found": 0,
                 "bioRxiv Found": 0,
-                "New Entries Added": 0
+                "New Entries Added": 1 if row['Status'] == "New entry" else 0
             })
-    
-    # 2. Log summary row
-    entries_to_log.append({
-        "Run Date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "Source": "Summary",
-        "DOI": "-",
-        "Title": "Search completed" if added_count > 0 or pubmed_count + biorxiv_count > 0 else "No new articles found",
-        "Status": "Success",
-        "PubMed Found": pubmed_count,
-        "bioRxiv Found": biorxiv_count,
-        "New Entries Added": added_count
-    })
     
     df_new = pd.DataFrame(entries_to_log)
     
     if os.path.exists(LOG_PATH):
         try:
             df_log = pd.read_csv(LOG_PATH)
-            # Ensure columns match even if header is missing or different
             df_log = pd.concat([df_log, df_new], ignore_index=True)
         except Exception:
             df_log = df_new
     else:
         df_log = df_new
     
-    # Ensure a consistent column order
     cols = ["Run Date", "Source", "DOI", "Title", "Status", "PubMed Found", "bioRxiv Found", "New Entries Added"]
     df_log = df_log[cols]
     
@@ -243,7 +258,9 @@ if __name__ == "__main__":
     print(f"Found {biorxiv_count} bioRxiv candidates.")
     
     all_details = pubmed_details + biorxiv_details
-    added_count, new_entries = update_csv(all_details)
+    added_count, all_processed = update_csv(all_details)
     
+    # For summary, we still want the new unique entries
+    new_entries = pd.DataFrame([p for p in all_processed if p["Status"] == "New entry"])
     generate_summary(new_entries)
-    log_run(pubmed_count, biorxiv_count, added_count, new_entries)
+    log_run(pubmed_count, biorxiv_count, added_count, all_processed)
