@@ -1,0 +1,16 @@
+New Fossil Articles Found!
+
+Total: 2
+
+- <i>Bicharracosaurus dionidei,</i> gen. et sp. nov., a new macronarian (Dinosauria, Sauropoda) from the Late Jurassic Cañadón Calcáreo Formation of Argentina and the problematic early evolution of macronarians.
+  Source: PubMed
+  Authors: Reutter A, Carballido JL, Windholz GJ, Pol D, Rauhut OWM
+  DOI: 10.7717/peerj.20945
+  Species: Unknown
+--------------------
+- Mellivora indosinica sp. nov. (Mustelidae, Carnivora): a Honey Badger from the Pleistocene of Vietnam.
+  Source: PubMed
+  Authors: Lopatin AV, Gimranov DO
+  DOI: 10.1134/S0012496626600016
+  Species: Mellivora indosinica
+--------------------
