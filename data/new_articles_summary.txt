@@ -1,0 +1,10 @@
+New Fossil Articles Found!
+
+Total: 1
+
+- A fossil galagid (Primates: Galagidae) from the Pliocene site of Woranso-Mille, Ethiopia.
+  Source: PubMed
+  Authors: Harrison T, Haile-Selassie Y
+  DOI: 10.1016/j.jhevol.2026.103831
+  Species: Unknown
+--------------------
