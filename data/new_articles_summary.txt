@@ -1,0 +1,10 @@
+New Fossil Articles Found!
+
+Total: 1
+
+- Hybrid genome-scale modeling and machine learning reveal cost-efficient strategies for phototrophic PHB production in Rhodopseudomonas palustris
+  Source: bioRxiv
+  Authors: Hernandez Gonzalez, H. A.; Buitron, G.
+  DOI: 10.64898/2026.04.24.720730
+  Species: Unknown
+--------------------
