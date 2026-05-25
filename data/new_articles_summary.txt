@@ -1,0 +1,10 @@
+New Fossil Articles Found!
+
+Total: 1
+
+- A complete-genome view of phylum Nanobdellota and recurrent Form III RuBisCO transfer between archaea and Patescibacteriota
+  Source: bioRxiv
+  Authors: Nielsen, T. N.; Lui, L. M.
+  DOI: 10.64898/2026.05.13.725050
+  Species: Maxwellarchaeum balticum
+--------------------
