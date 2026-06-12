@@ -2,9 +2,9 @@ New Fossil Articles Found!
 
 Total: 1
 
-- How many phage species remain undiscovered? Species sampling approaches to inform phage discovery
-  Source: bioRxiv
-  Authors: Cavallaro, M.; Kinsella, A.; Megremis, S.; Morozov, A.; Millard, A. D.; Freund, F.
-  DOI: 10.64898/2026.02.15.704868
+- A new eucrocopodan archosauriform from the Middle Triassic of southern Brazil and the phylogeny of Euparkeriidae.
+  Source: PubMed
+  Authors: Garcia MS, Cerqueira GM, Battista F, de Andrade MB, Müller RT
+  DOI: 10.1038/s41598-026-53740-9
   Species: Unknown
 --------------------
