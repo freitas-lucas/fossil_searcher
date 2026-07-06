@@ -2,9 +2,9 @@ New Fossil Articles Found!
 
 Total: 1
 
-- Phylogenetic inference from an incomplete fossil record
+- Genomic Distortion of Jawed Vertebrate Phylogeny
   Source: bioRxiv
-  Authors: Hohmann, N.; Warnock, R. C. M.; Jarochowska, E.
-  DOI: 10.64898/2026.06.24.734220
+  Authors: Brownstein, C.; Yang, L.; Dornburg, A.; Near, T. J.
+  DOI: 10.64898/2026.06.28.735080
   Species: Unknown
 --------------------
