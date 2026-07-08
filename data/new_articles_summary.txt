@@ -1,0 +1,16 @@
+New Fossil Articles Found!
+
+Total: 2
+
+- <b><i>Allostrophus tui</i> sp. nov.: A new fossil species of polypore fungus beetle from the mid-Cretaceous Kachin amber (Coleoptera, Tetratomidae, Eustrophinae)</b>.
+  Source: PubMed
+  Authors: Hsiao Y
+  DOI: 10.11646/zootaxa.5845.1.9
+  Species: Unknown
+--------------------
+- Species boundaries, host associations, and possible host shifts in the turtle barnacle genus Platylepas
+  Source: bioRxiv
+  Authors: Hayashi, R.; Ozawa, H.; Seiko, T.; Sasai, T.; Kishida, T.
+  DOI: 10.1101/2025.09.03.674014
+  Species: Unknown
+--------------------
