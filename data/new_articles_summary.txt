@@ -2,9 +2,9 @@ New Fossil Articles Found!
 
 Total: 1
 
-- Likweli: A remarkable new species of Colobus monkey from the Lomami National Park, Democratic Republic of Congo.
+- New records of extinct Icacinaceae from Paleocene rainforests of northwestern South America.
   Source: PubMed
-  Authors: Hart JA, Amboko JD, Arenson JL, Horton ER, Coates KF, Kapale JI, Koko MB, Hart TB, Gilbert CC, Sargis EJ, Detwiler KM
-  DOI: 10.1371/journal.pone.0349857
-  Species: Colobus congoensis
+  Authors: Puente-Santos LM, Carvalho MR, Shirley E, Herrera F
+  DOI: 10.1002/ajb2.70237
+  Species: Palaeophytocrene paramoae
 --------------------
