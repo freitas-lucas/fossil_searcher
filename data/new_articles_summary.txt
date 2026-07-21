@@ -1,10 +1,16 @@
 New Fossil Articles Found!
 
-Total: 1
+Total: 2
 
-- Aptian archaeoniscid isopod from the Araripe Basin supports Tethyan-linked dispersal into Gondwanan lacustrine systems.
+- Extroparvum occidentale gen. et sp. nov. and the Cretaceous diversification of Lauraceae.
   Source: PubMed
-  Authors: Lima D, Anker A, Heads SW, Pinheiro AP, Santana W
-  DOI: 10.1038/s41598-026-59890-0
+  Authors: Tang KK, Matsunaga KKS, Atkinson BA
+  DOI: 10.1002/ajb2.70236
   Species: Unknown
+--------------------
+- The colourless dictyochophyte Ciliophrys sp. Baltic secondarily lacks a plastid but hosts a bacterial endosymbiont
+  Source: bioRxiv
+  Authors: Barcyte, D.; Husnik, F.; Elias, M.
+  DOI: 10.64898/2026.03.27.714854
+  Species: Penulousia baltica
 --------------------
