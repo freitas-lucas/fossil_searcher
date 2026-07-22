@@ -1,16 +1,10 @@
 New Fossil Articles Found!
 
-Total: 2
+Total: 1
 
-- Extroparvum occidentale gen. et sp. nov. and the Cretaceous diversification of Lauraceae.
+- Earliest mimicking of flowering plants by insects.
   Source: PubMed
-  Authors: Tang KK, Matsunaga KKS, Atkinson BA
-  DOI: 10.1002/ajb2.70236
+  Authors: Li S, Yang Q, Kang N, Zhou C, Li Y, Hu J, Engel MS, Ren D, Shi C
+  DOI: 10.1111/1744-7917.70323
   Species: Unknown
---------------------
-- The colourless dictyochophyte Ciliophrys sp. Baltic secondarily lacks a plastid but hosts a bacterial endosymbiont
-  Source: bioRxiv
-  Authors: Barcyte, D.; Husnik, F.; Elias, M.
-  DOI: 10.64898/2026.03.27.714854
-  Species: Penulousia baltica
 --------------------
