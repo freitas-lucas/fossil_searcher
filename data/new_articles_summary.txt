@@ -2,9 +2,9 @@ New Fossil Articles Found!
 
 Total: 1
 
-- Larger Owls (Aves: Strigidae) from the Lower Pleistocene of Crimea.
+- A new Cretaceous family illuminates the early evolutionary history of True Sawflies (Hymenoptera: Tenthredinoidea).
   Source: PubMed
-  Authors: Zelenkov NV
-  DOI: 10.1134/S0012496626600284
-  Species: Asio pythiotus
+  Authors: Zhuang J, Vilhelmsen L, Feng Q, Jouault C, Shih C, Ren D, Wang M
+  DOI: 10.1111/cla.70059
+  Species: Eotenthredo magna
 --------------------
