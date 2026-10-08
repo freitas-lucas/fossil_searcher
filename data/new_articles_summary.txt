@@ -1,0 +1,16 @@
+New Fossil Articles Found!
+
+Total: 2
+
+- Cranial anatomy of the Middle Eocene Egyptian crocodylian <i>Herugavialis cairensis</i> provides new insights into gavialoid diversity in the Mediterranean region.
+  Source: PubMed
+  Authors: Burke PMJ, Spiekman SNF, Salem BS, Saber S, Sallam HM, Mannion PD
+  DOI: 10.1098/rsos.261173
+  Species: Unknown
+--------------------
+- A new species of Lonchidiidae (Hybodontiformes) from the Late Jurassic of Brazil (Aliança Formation, Jatobá Basin).
+  Source: PubMed
+  Authors: de Souza Ribeiro L, de França MAG
+  DOI: 10.1002/ar.70120
+  Species: Unknown
+--------------------
